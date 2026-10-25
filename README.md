@@ -1,76 +1,33 @@
-# ThePlayLoft Wii Kiosk Launcher
+# ThePlayLoft Wii Kiosk
 
-This repository contains a starter Wii homebrew project for a kiosk-style game launcher. The app hosts a small local web page on the Wii, and the receptionist can click a button to send a launch command to the Wii app. The Wii app then decides whether to launch the selected game from USB.
+This repository contains a Wii homebrew kiosk app that acts as a payment/session gate for a public game booth.
 
-The project is intentionally structured as a template so you can adapt it to your own Wiiflow-compatible launch flow.
+The app does not try to launch a game by itself. Instead:
 
-## What this includes
+- the Wii boots into a full-screen waiting page
+- the receptionist opens the kiosk page locally over Wi-Fi
+- payment/session info is entered and approved
+- when the request is approved, the app exits back to the Wii menu/home screen
+- the user then manually launches Wiiflow or the game they want
 
-- A minimal Wii homebrew app skeleton
-- Local HTTP server running on the Wii
-- HTML/JS waiting screen served from the Wii app
-- Launch endpoint (`/launch`) for the receptionist UI
-- A safe allow-list of allowed game IDs
-- Timer-based session flow (`/stop`, `state tracking`)
-- Codespaces-ready setup for installing the Wii toolchain
+This is intentionally designed to be safe and simple.
 
-## Project structure
+## Behavior
 
-- `src/main.c` - app entry point and main loop
-- `src/http_server.c` / `http_server.h` - tiny HTTP server implementation
-- `src/launcher.c` / `launcher.h` - launch logic and session state
-- `src/page.h` - embedded waiting page HTML
-- `Makefile` - devkitPro build rules
-- `scripts/setup-devkitpro.sh` - downloads and configures the Wii toolchain
-- `.devcontainer/` - Codespaces environment
+1. User sees a waiting screen
+2. Receptionist approves session/payment
+3. App returns to the Wii System Menu
+4. User manually launches the game through Wiiflow
 
-## Build flow
+## Safety
 
-1. Open the repo in GitHub Codespaces.
-2. Run the setup script:
+This project intentionally avoids direct binary title launch logic. That is risky and unnecessary for your use case.
 
-   ```bash
-   bash scripts/setup-devkitpro.sh
-   ```
+Instead, the app acts as a lock / gate screen and exits cleanly when the session is approved.
 
-3. Build the project:
+## Build
 
-   ```bash
-   make
-   ```
-
-4. Output will be a Wii homebrew ELF, which can then be converted to a bootable `.dol` or wrapped into your preferred loader flow.
-
-## Important note
-
-This is a template. It does not include proprietary Wiiflow internals or a private launcher API. In production, you will replace the example `launchGameById()` implementation with the actual Wiiflow-compatible or direct USB-loader launch method your Wii setup uses.
-
-## Network flow
-
-```text
-Browser -> Wii app /launch -> Wii app validates command -> Wii app launches game -> Timer ends -> return to waiting screen
+```bash
+bash scripts/setup-devkitpro.sh
+make
 ```
-
-## Example launch request
-
-```http
-POST /launch
-Content-Type: application/json
-
-{
-  "game": "game1",
-  "minutes": 30
-}
-```
-
-The app validates that `game1` is allowed, then launches the game and starts a session timer.
-
-## Why this is a good starting point
-
-It gives you a clean separation between:
-
-- payment / admin logic in your web app or backend
-- launch decisions in the Wii homebrew app
-- the actual game launch in the Wii loader stack
-
-That keeps the Wii app as the local authority for what is allowed to run.

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <ogcsys.h>
+
 #include "launcher.h"
 
 static const char *allowed_games[MAX_ALLOWED_GAMES] = {
@@ -65,37 +67,12 @@ static void parse_game_and_minutes(const char *request_body, char *game_id, size
     }
 }
 
-static int launch_via_wiiflow(const char *game_id) {
-    /*
-     * IMPORTANT: This project intentionally does NOT attempt to directly boot a
-     * Wii title from a raw game binary or by hand-assembling a USB loader call.
-     *
-     * The safe contract is: the kiosk app validates the request, then exits to
-     * Wiiflow's own launcher path so that Wiiflow handles the actual game start.
-     *
-     * In a real deployment, this is where you call the verified Wiiflow boot.dol
-     * or the exact homebrew loader path your installation uses.
-     *
-     * Example pattern (device-specific, must be tested on the target Wii):
-     *   Exec("sd:/apps/wiiflow/boot.dol", NULL);
-     * or a path under your SD card that points directly at Wiiflow.
-     *
-     * The reason we do this is simple: if the Wii app tries to emulate Wiiflow's
-     * internals itself, it can break USB loading or even damage the system in the
-     * worst case. Wiiflow is the known-good launcher; the kiosk app should only
-     * decide whether the request is allowed.
-     */
-
-    printf("SAFE MODE: allowing Wiiflow to own the actual launch flow for game '%s'\n", game_id);
-
-    /*
-     * This stub is intentionally conservative: in production, replace this with
-     * the exact Wiiflow launch call you verified on your Wii setup.
-     */
-    return 1;
+void reset_to_wii_menu(void) {
+    printf("Payment approved. Returning to Wii menu/home screen...\n");
+    SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0);
 }
 
-launch_result_t launch_game_from_request(const char *request_body) {
+launch_result_t approve_session_from_request(const char *request_body) {
     launch_result_t result;
     memset(&result, 0, sizeof(result));
 
@@ -109,18 +86,14 @@ launch_result_t launch_game_from_request(const char *request_body) {
         return result;
     }
 
-    if (launch_via_wiiflow(game_id) != 1) {
-        snprintf(result.message, sizeof(result.message), "Wiiflow launch failed for '%s'", game_id);
-        result.success = 0;
-        return result;
-    }
-
     snprintf(current_game, sizeof(current_game), "%s", game_id);
     current_session_active = 1;
 
-    printf("Session accepted: '%s' for %d minutes. Wiiflow remains the launcher.\n", current_game, minutes);
+    printf("Session approved: '%s' for %d minutes. Exiting kiosk back to Wii menu.\n", current_game, minutes);
 
-    snprintf(result.message, sizeof(result.message), "Launching %s in Wiiflow for %d minutes", current_game, minutes);
+    reset_to_wii_menu();
+
+    snprintf(result.message, sizeof(result.message), "Payment approved. Returning to the Wii menu.");
     result.success = 1;
     return result;
 }
