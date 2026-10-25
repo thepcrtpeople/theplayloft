@@ -1,0 +1,43 @@
+#ifndef PAGE_H
+#define PAGE_H
+
+static const char *waiting_page_html =
+    "<!doctype html>"
+    "<html><head><meta charset=\"utf-8\">"
+    "<title>PlayLoft Kiosk</title>"
+    "<style>"
+    "body { font-family: sans-serif; background: #111827; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }"
+    "#panel { background: #1f2937; padding: 32px; border-radius: 12px; width: min(90vw, 640px); text-align: center; }"
+    "button { background: #22c55e; color: white; border: none; border-radius: 8px; padding: 18px 28px; font-size: 18px; cursor: pointer; }"
+    "button:hover { background: #16a34a; }"
+    "select, input { padding: 12px; font-size: 16px; margin: 10px; border-radius: 8px; }"
+    "</style>"
+    "</head><body>"
+    "<div id=\"panel\">"
+    "<h1>Waiting for session</h1>"
+    "<p>Select a game and start the session.</p>"
+    "<select id=\"game\">"
+    "<option value=\"game1\">Game 1</option>"
+    "<option value=\"game2\">Game 2</option>"
+    "<option value=\"race-demo\">Race Demo</option>"
+    "<option value=\"arcade-01\">Arcade 01</option>"
+    "</select>"
+    "<input id=\"minutes\" type=\"number\" value=\"30\" min=\"5\" max=\"120\" />"
+    "<br><button onclick=\"launchSession()\">Start Session</button>"
+    "<p id=\"status\"></p>"
+    "</div>"
+    "<script>"
+    "function launchSession() {"
+    "  const game = document.getElementById('game').value;"
+    "  const minutes = document.getElementById('minutes').value;"
+    "  const status = document.getElementById('status');"
+    "  status.textContent = 'Launching...';"
+    "  fetch('/launch', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({game, minutes: Number(minutes)}) })"
+    "    .then(r => r.json())"
+    "    .then(data => { status.textContent = data.message || 'Done'; })"
+    "    .catch(() => { status.textContent = 'Request failed'; });"
+    "}"
+    "</script>"
+    "</body></html>";
+
+#endif

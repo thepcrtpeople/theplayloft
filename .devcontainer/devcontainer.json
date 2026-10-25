@@ -1,0 +1,4 @@
+
+# GitHub Codespaces/devcontainer configuration
+
+This repository includes a lightweight devcontainer setup that installs the basic tools needed for building Wii homebrew in Codespaces.

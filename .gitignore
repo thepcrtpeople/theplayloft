@@ -1,0 +1,29 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "http_server.h"
+
+int main(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
+
+    printf("ThePlayLoft Wii kiosk launcher booting...\n");
+
+    http_server_t server;
+    memset(&server, 0, sizeof(server));
+    server.listen_fd = -1;
+
+    if (http_server_start(&server) != 0) {
+        fprintf(stderr, "Failed to start HTTP server\n");
+        return 1;
+    }
+
+    printf("HTTP server listening on port %d\n", HTTP_PORT);
+    printf("Open the waiting page from a browser on the same Wi-Fi network\n");
+
+    http_server_run_loop(&server);
+    http_server_stop(&server);
+
+    return 0;
+}

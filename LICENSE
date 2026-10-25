@@ -1,0 +1,17 @@
+# Build artifacts
+build/
+*.elf
+*.dol
+*.map
+*.o
+
+# Editor files
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Local environment files
+.env
