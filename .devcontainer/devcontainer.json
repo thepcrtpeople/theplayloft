@@ -1,4 +1,19 @@
-
-# GitHub Codespaces/devcontainer configuration
-
-This repository includes a lightweight devcontainer setup that installs the basic tools needed for building Wii homebrew in Codespaces.
+{
+  "name": "ThePlayLoft Wii Kiosk",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools"
+      ]
+    }
+  },
+  "postCreateCommand": "bash scripts/setup-devkitpro.sh"
+}
